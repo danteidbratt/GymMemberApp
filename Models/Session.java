@@ -2,7 +2,7 @@ package Models;
 
 import java.time.*;
 
-public class Session {
+public abstract class Session {
     
     private LocalDateTime starts;
     private Trainer trainer;

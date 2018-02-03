@@ -1,7 +1,7 @@
-package Models;
+package ViewModels;
 
-public class Member {
-
+public class ViewMember {
+    
     private int ID;
     private String name;
 
@@ -12,7 +12,7 @@ public class Member {
     public void setID(int ID) {
         this.ID = ID;
     }
-    
+
     public String getName() {
         return name;
     }

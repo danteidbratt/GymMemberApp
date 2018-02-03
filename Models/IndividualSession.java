@@ -1,9 +1,8 @@
 package Models;
 
-public class IndividualSession {
+public class IndividualSession extends Session{
     
     private boolean attendance;
-    private Session session;
     private Member member;
 
     public boolean isAttendance() {
@@ -12,14 +11,6 @@ public class IndividualSession {
 
     public void setAttendance(boolean attendance) {
         this.attendance = attendance;
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
     }
 
     public Member getMember() {
