@@ -80,6 +80,9 @@ public class Frame extends JFrame {
                 currentPanel = groupOrIndividualPanel;
                 break;
             case GROUP:
+                groupPanel.setTypeSlide(capsule.getTypes());
+                groupPanel.setDateSlide(capsule.getDates());
+                groupPanel.addComboBoxes();
                 currentPanel = groupPanel;
                 break;
             case INDIVIDUAL:

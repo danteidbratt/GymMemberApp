@@ -18,10 +18,8 @@ public class GroupPanel extends SuperPanel{
     JButton backbButton;
 
     public GroupPanel() {
-        types = new String[1];
-        dates = new String [1];
-        this.typeSlide = new JComboBox<>(types);
-        this.dateSlide = new JComboBox<>(dates);
+        types = new String[0];
+        dates = new String[0];
         this.sessions = new JComboBox<>();
         this.midLabel = new JLabel();
         this.confirmButton = new JButton("Book Workout");
@@ -34,8 +32,8 @@ public class GroupPanel extends SuperPanel{
         setBackground(background);
         confirmButton.setFont(new Font("SansSerif", 1, 18));
         backbButton.setFont(new Font("SansSerif", 1, 18));
-        add(typeSlide);
-        add(dateSlide);
+//        add(typeSlide);
+//        add(dateSlide);
         add(sessions);
         add(midLabel);
         add(confirmButton);
@@ -64,11 +62,20 @@ public class GroupPanel extends SuperPanel{
         this.backbButton = backbButton;
     }
 
-    public void setTypes(List<String> types) {
-        this.types = (String[])types.toArray();
+    public void setTypeSlide(List<String> types) {
+        types.add(0, "Any Workout");
+        this.types = types.toArray(this.types);
+        this.typeSlide = new JComboBox<>(this.types);
     }
 
-    public void setDates(List<String> dates) {
-        this.dates = (String[])dates.toArray();
+    public void setDateSlide(List<String> dates) {
+        dates.add(0, "Any Date");
+        this.dates = dates.toArray(this.dates);
+        this.dateSlide = new JComboBox<>(this.dates);
+    }
+    
+    public void addComboBoxes(){
+        add(typeSlide, 0);
+        add(dateSlide, 1);
     }
 }

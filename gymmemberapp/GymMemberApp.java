@@ -3,6 +3,9 @@ package gymmemberapp;
 import static gymmemberapp.Capsule.State.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class GymMemberApp {
@@ -84,5 +87,8 @@ public class GymMemberApp {
     private void bookGroup(){
         capsule.setState(GROUP);
         capsule.setTypes(repository.getExerciseTypes("").stream().map(e -> e.getName()).collect(Collectors.toList()));
+        List<String> a = new ArrayList<>();
+        a.add("Tja");
+        capsule.setDates(a);
     }
 }
