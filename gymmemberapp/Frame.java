@@ -4,7 +4,6 @@ import Panels.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.swing.*;
 
 public class Frame extends JFrame {
@@ -44,7 +43,7 @@ public class Frame extends JFrame {
 
     public void setupFrame() {
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(350, 500));
+        setPreferredSize(new Dimension(500, 500));
         setBackground(background);
         logo.setText("- Best Gym Ever -");
         logo.setBackground(background);

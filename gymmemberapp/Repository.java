@@ -147,6 +147,19 @@ public class Repository {
         return -1;
     }
     
+    public int removeGroupSession(String memberID, String groupSessionID){
+        String query = "delete from booking where memberID = ? and groupSessionID = ?";
+        try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
+            PreparedStatement stmt = con.prepareStatement(query)){
+            stmt.setString(1, memberID);
+            stmt.setString(2, groupSessionID);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+    
     public String allOrOne(String query, String nameID){
         if(nameID.length() > 0)
             return isInteger(nameID) ? query + " where ID = ?" : query + " where name = ?";

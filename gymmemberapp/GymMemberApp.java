@@ -88,8 +88,14 @@ public class GymMemberApp {
                   || e.getSource() == frame.individualPanel.getBackbButton()){
                 capsule.setState(GROUP_OR_INDIVIDUAL);
             }
-            else if (e.getSource() == frame.viewReservationsPanel.getFutureGroupSessionSlide()) {
-                frame.viewReservationsPanel.getRemoveGroupButton().setVisible(true);
+            else if (e.getSource() == frame.viewReservationsPanel.getReservedGroupSessionSlide()) {
+                removeGroupSession();
+            }
+            else if (e.getSource() == frame.viewReservationsPanel.getReservedIndividualSessionSlide()) {
+                removeIndividualSession();
+            }
+            else if (e.getSource() == frame.viewReservationsPanel.getRemoveGroupButton()) {
+                executeGroupSessionRemoval();
             }
             else if (e.getSource() == frame.viewReservationsPanel.getBackbButton()) {
                 capsule.setState(BOOK_OR_UNBOOK);
@@ -151,6 +157,7 @@ public class GymMemberApp {
                     .collect(Collectors.toList()), ah);
         }
         frame.groupPanel.resetSessionSlide();
+        frame.groupPanel.hideChoice();
     }
     
     private void filterGroupByDate(){
@@ -165,22 +172,26 @@ public class GymMemberApp {
                     .collect(Collectors.toList()), ah);
         }
         frame.groupPanel.getConfirmButton().setVisible(false);
+        frame.groupPanel.hideChoice();
     }
     
     private void filterGroupBySession(){
-        String[] inputs = frame.groupPanel.getSessionSlide().getSelectedItem().toString().split("\\s/\\s");
-        chosenTime = inputs[0].trim();
-        chosenHall = inputs[1].trim();
-        chosenTrainer = inputs[2].trim();
-        chosenDateTime = LocalDateTime.parse(chosenDate + " " + chosenTime + ":00", formatter);
-        chosenGroupSessionID = String.valueOf(capsule.getGroupSessions().stream()
-                .filter(a -> a.getExerciseType().getName().equalsIgnoreCase(chosenType)
-                        && a.getHall().getName().equalsIgnoreCase(chosenHall)
-                        && a.getTimeSpan().getStart().equals(chosenDateTime)
-                        && a.getTrainer().getName().equalsIgnoreCase(chosenTrainer))
-                .collect(Collectors.toList())
-                .get(0).getGroupSessionID());
-        frame.groupPanel.getConfirmButton().setVisible(true);
+        if (frame.groupPanel.getSessionSlide().getSelectedIndex() > 0) {
+            String[] inputs = frame.groupPanel.getSessionSlide().getSelectedItem().toString().split("\\s/\\s");
+            chosenTime = inputs[0].trim();
+            chosenHall = inputs[1].trim();
+            chosenTrainer = inputs[2].trim();
+            chosenDateTime = LocalDateTime.parse(chosenDate + " " + chosenTime + ":00", formatter);
+            chosenGroupSessionID = String.valueOf(capsule.getGroupSessions().stream()
+                    .filter(a -> a.getExerciseType().getName().equalsIgnoreCase(chosenType)
+                            && a.getHall().getName().equalsIgnoreCase(chosenHall)
+                            && a.getTimeSpan().getStart().equals(chosenDateTime)
+                            && a.getTrainer().getName().equalsIgnoreCase(chosenTrainer))
+                    .collect(Collectors.toList())
+                    .get(0).getGroupSessionID());
+            frame.groupPanel.getConfirmButton().setVisible(true);
+            frame.groupPanel.displayChoice();
+        }
     }
     
     private void confirmGroupReservation(){
@@ -193,18 +204,13 @@ public class GymMemberApp {
             JOptionPane.showMessageDialog(null, "Reservation Failed\nPlease try again");
         }
         capsule.getMember().setGroupSessions(repository.getGroupSessionsInMember(String.valueOf(capsule.getMember().getID())));
+        frame.groupPanel.hideChoice();
     }
     
     private void viewReservations(){
         capsule.setState(VIEW_RESERVATIONS);
-        frame.viewReservationsPanel.setFutureGroupSessionSlide(capsule.getMember().getGroupSessions().stream()
+        frame.viewReservationsPanel.setReservedGroupSessionSlide(capsule.getMember().getGroupSessions().stream()
                 .filter(a -> a.getTimeSpan().getStart().isAfter(LocalDateTime.now()))
-                .map(b -> b.getExerciseType().getName() + " / "
-                        + b.getTimeSpan().getStart().toString().replace('T', ' ') + " / "
-                        + b.getHall().getName() + " / "
-                        + b.getTrainer().getName()).collect(Collectors.toList()), ah);
-        frame.viewReservationsPanel.setPastSessionSlide(capsule.getMember().getGroupSessions().stream()
-                .filter(a -> a.getTimeSpan().getStart().isBefore(LocalDateTime.now()))
                 .map(b -> b.getExerciseType().getName() + " / "
                         + b.getTimeSpan().getStart().toString().replace('T', ' ') + " / "
                         + b.getHall().getName() + " / "
@@ -220,4 +226,47 @@ public class GymMemberApp {
         return false;
     }
     
+    private void removeGroupSession(){
+        if (frame.viewReservationsPanel.getReservedGroupSessionSlide().getSelectedIndex() > 0){
+            String[] inputs = frame.viewReservationsPanel.getReservedGroupSessionSlide().getSelectedItem().toString().split("\\s/\\s");
+            chosenType = inputs[0].trim();
+            chosenDateTime = LocalDateTime.parse(inputs[1].trim() + ":00", formatter);
+            chosenHall = inputs[2].trim();
+            chosenTrainer = inputs[3].trim();
+            chosenGroupSessionID = String.valueOf(capsule.getMember().getGroupSessions().stream()
+                    .filter(a -> a.getExerciseType().getName().equalsIgnoreCase(chosenType)
+                              && a.getTimeSpan().getStart().equals(chosenDateTime)
+                              && a.getHall().getName().equalsIgnoreCase(chosenHall)
+                              && a.getTrainer().getName().equalsIgnoreCase(chosenTrainer))
+                    .collect(Collectors.toList())
+                    .get(0).getGroupSessionID());
+            frame.viewReservationsPanel.resetReservedIndividualSessionSlide();
+            frame.viewReservationsPanel.showRemoveGroupButton();
+        }
+        else {
+            frame.viewReservationsPanel.hideRemoveButtons();
+        }
+    }
+    
+    private void removeIndividualSession(){
+        if (frame.viewReservationsPanel.getReservedIndividualSessionSlide().getSelectedIndex() > 0) {
+            frame.viewReservationsPanel.showRemoveIndividualButton();
+            frame.viewReservationsPanel.showRemoveIndividualButton();
+        }
+    }
+    
+    private void executeGroupSessionRemoval(){
+        capsule.setState(BOOK_OR_UNBOOK);
+        frame.updateFrame(capsule);
+        if (repository.removeGroupSession(String.valueOf(capsule.getMember().getID()), chosenGroupSessionID) == 1) {
+            JOptionPane.showMessageDialog(null, "Reservation Deleted");
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Unable to delete reservation. Please try again");
+        }
+        frame.viewReservationsPanel.resetReservedGroupSessionSlide();
+        frame.viewReservationsPanel.resetReservedIndividualSessionSlide();
+        frame.viewReservationsPanel.hideRemoveButtons();
+        capsule.getMember().setGroupSessions(repository.getGroupSessionsInMember(String.valueOf(capsule.getMember().getID())));
+    }
 }

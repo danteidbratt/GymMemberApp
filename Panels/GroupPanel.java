@@ -34,6 +34,8 @@ public class GroupPanel extends SuperPanel{
     public void setupPanel() {
         setLayout(new GridLayout(6, 1, 20, 10));
         setBackground(background);
+        midLabel.setFont(new Font("SansSerif", 2, 15));
+        midLabel.setHorizontalAlignment(SwingConstants.CENTER);
         confirmButton.setFont(new Font("SansSerif", 1, 18));
         backbButton.setFont(new Font("SansSerif", 1, 18));
         add(typeSlide);
@@ -116,6 +118,16 @@ public class GroupPanel extends SuperPanel{
 
     public JComboBox<String> getSessionSlide() {
         return sessionSlide;
+    }
+    
+    public void displayChoice(){
+        midLabel.setText(typeSlide.getSelectedItem().toString() + " / " +
+                         dateSlide.getSelectedItem().toString() + " / " +
+                         sessionSlide.getSelectedItem().toString());
+    }
+    
+    public void hideChoice(){
+        midLabel.setText("");
     }
     
     public void resetDateSlide(){
