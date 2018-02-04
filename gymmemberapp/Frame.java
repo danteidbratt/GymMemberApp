@@ -22,6 +22,7 @@ public class Frame extends JFrame {
     GroupOrIndividualPanel groupOrIndividualPanel;
     GroupPanel groupPanel;
     IndividualPanel individualPanel;
+    ViewReservationsPanel viewReservationsPanel;
     List<SuperPanel> allPanels;
 
     public Frame() throws HeadlessException {
@@ -37,7 +38,8 @@ public class Frame extends JFrame {
         this.groupOrIndividualPanel = new GroupOrIndividualPanel();
         this.groupPanel = new GroupPanel();
         this.individualPanel = new IndividualPanel();
-        this.allPanels = Arrays.asList(loginPanel, bookOrUnbookPanel, groupOrIndividualPanel, groupPanel, individualPanel);
+        this.viewReservationsPanel = new ViewReservationsPanel();
+        this.allPanels = Arrays.asList(loginPanel, bookOrUnbookPanel, groupOrIndividualPanel, groupPanel, individualPanel, viewReservationsPanel);
     }
 
     public void setupFrame() {
@@ -80,22 +82,13 @@ public class Frame extends JFrame {
                 currentPanel = groupOrIndividualPanel;
                 break;
             case GROUP:
-//                groupPanel.setTypeSlide(capsule.getGroupSessions().stream()
-//                        .map(s -> s.getExerciseType().getName())
-//                        .collect(Collectors.toSet())
-//                        .stream()
-//                        .collect(Collectors.toList()));
-//                groupPanel.setDateSlide(capsule.getGroupSessions().stream()
-//                        .map(s -> s.getTimeScheduled().toLocalDate().toString())
-//                        .collect(Collectors.toSet())
-//                        .stream()
-//                        .collect(Collectors.toList()));
-//                groupPanel.addComboBoxes();
                 currentPanel = groupPanel;
                 break;
             case INDIVIDUAL:
                 currentPanel = individualPanel;
                 break;
+            case VIEW_RESERVATIONS:
+                currentPanel = viewReservationsPanel;
             default:
                 break;
         }

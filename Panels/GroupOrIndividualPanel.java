@@ -13,7 +13,6 @@ public class GroupOrIndividualPanel extends SuperPanel {
     JButton groupButton;
     JLabel midLabel;
     JButton individualButton;
-    JLabel botLabel;
     JButton backButton;
     List<JButton> allButtons;
     JComboBox<String> workoutTypes;
@@ -24,7 +23,7 @@ public class GroupOrIndividualPanel extends SuperPanel {
         this.individualButton = new JButton("Individual Workout");
         this.backButton = new JButton("Back");
         this.allButtons = Arrays.asList(groupButton, individualButton, backButton);
-        this.botLabel = new JLabel();
+        this.midLabel = new JLabel();
         this.workoutTypes = new JComboBox<>();
     }
     
@@ -40,6 +39,7 @@ public class GroupOrIndividualPanel extends SuperPanel {
         add(topLabel);
         add(groupButton);
         add(individualButton);
+        add(midLabel);
         add(backButton);
     }
 

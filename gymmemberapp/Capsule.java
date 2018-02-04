@@ -16,7 +16,7 @@ public class Capsule {
     }
     
     protected enum State {
-        LOGIN, BOOK_OR_UNBOOK, GROUP_OR_INDIVIDUAL, GROUP, INDIVIDUAL,
+        LOGIN, BOOK_OR_UNBOOK, GROUP_OR_INDIVIDUAL, GROUP, INDIVIDUAL, VIEW_RESERVATIONS
     }
 
     public State getState() {

@@ -60,6 +60,9 @@ public class GymMemberApp {
             else if (e.getSource() == frame.bookOrUnbookPanel.getBookButton()) {
                 capsule.setState(GROUP_OR_INDIVIDUAL);
             }
+            else if (e.getSource() == frame.bookOrUnbookPanel.getViewReservationsButton()) {
+                viewReservations();
+            }
             else if (e.getSource() == frame.groupOrIndividualPanel.getGroupButton()) {
                 bookGroup();
             }
@@ -84,6 +87,9 @@ public class GymMemberApp {
             else if (e.getSource() == frame.groupPanel.getBackbButton()
                   || e.getSource() == frame.individualPanel.getBackbButton()){
                 capsule.setState(GROUP_OR_INDIVIDUAL);
+            }
+            else if (e.getSource() == frame.viewReservationsPanel.getBackbButton()) {
+                capsule.setState(BOOK_OR_UNBOOK);
             }
             else if (e.getSource() == frame.loginPanel.getExitButton()) {
                 System.exit(0);
@@ -181,9 +187,26 @@ public class GymMemberApp {
         }
     }
     
+    private void viewReservations(){
+        capsule.setState(VIEW_RESERVATIONS);
+        frame.viewReservationsPanel.setFutureGroupSessionSlide(capsule.getMember().getGroupSessions().stream()
+                .filter(a -> a.getTimeSpan().getStart().isAfter(LocalDateTime.now()))
+                .map(b -> b.getExerciseType().getName() + " - "
+                        + b.getTimeSpan().getStart().toString() + " - "
+                        + b.getHall().getName() + " - "
+                        + b.getTrainer().getName()).collect(Collectors.toList()), ah);
+        frame.viewReservationsPanel.setPastSessionSlide(capsule.getMember().getGroupSessions().stream()
+                .filter(a -> a.getTimeSpan().getStart().isBefore(LocalDateTime.now()))
+                .map(b -> b.getExerciseType().getName() + " - "
+                        + b.getTimeSpan().getStart().toString() + " - "
+                        + b.getHall().getName() + " - "
+                        + b.getTrainer().getName()).collect(Collectors.toList()), ah);
+    }
+    
     private boolean areSimultaneous(List<TimeSpan> x1, TimeSpan x2){
         for (TimeSpan t : x1) {
-            if((t.getStart().isAfter(x2.getStart()) && t.getStart().isBefore(x2.getFinish())) || (t.getFinish().isAfter(x2.getStart()) && t.getFinish().isBefore(x2.getFinish())))
+            if((t.getStart().isAfter(x2.getStart()) && t.getStart().isBefore(x2.getFinish()))
+            || (t.getFinish().isAfter(x2.getStart()) && t.getFinish().isBefore(x2.getFinish())))
                 return true;
         }
         return false;
