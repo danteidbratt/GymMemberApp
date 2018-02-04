@@ -23,7 +23,7 @@ public class Repository {
     public List<Member> getMembers(String name){
         List<Member> members = new ArrayList<>();
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
-            PreparedStatement stmt = con.prepareStatement(allOrOneName("select * from member", name))){
+            PreparedStatement stmt = con.prepareStatement(allOrOne("select * from member", name))){
             if(name.length() > 0)
                 stmt.setString(1, name);
             ResultSet rs = stmt.executeQuery();
@@ -42,7 +42,7 @@ public class Repository {
     public List<ExerciseType> getExerciseTypes(String name){
         List<ExerciseType> exerciseTypes = new ArrayList<>();
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
-            PreparedStatement stmt = con.prepareStatement(allOrOneName("select * from exerciseType", name))){
+            PreparedStatement stmt = con.prepareStatement(allOrOne("select * from exerciseType", name))){
             if(name.length() > 0)
                 stmt.setString(1, name);
             ResultSet rs = stmt.executeQuery();
@@ -95,12 +95,19 @@ public class Repository {
         return groupSessions;
     }
     
-    public String allOrOneName(String query, String name){
-        return name.length() > 0 ? query + " where name = ?" : query;
+    public String allOrOne(String query, String name){
+        if(name.length() > 0)
+            return isInteger(name) ? query + " where ID = ?" : query + " where name = ?";
+        return query;
     }
     
-    public String allOrOneID(String query, String ID){
-        return ID.length() > 0 ? query + " where name = ?" : query;
+    public boolean isInteger(String s){
+        try{
+            Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
     }
     
 }
