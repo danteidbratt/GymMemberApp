@@ -1,11 +1,11 @@
 package gymmemberapp;
 
+import Models.GroupSession;
 import static gymmemberapp.Capsule.State.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +15,9 @@ public class GymMemberApp {
     Repository repository;
     Capsule capsule;
     ActionHandler ah;
+    String chosenType;
+    String chosenDate;
+    String chosenSession;
 
     public GymMemberApp() {
         this.frame = new Frame();
@@ -59,6 +62,15 @@ public class GymMemberApp {
             else if (e.getSource() == frame.groupOrIndividualPanel.getBackButton()) {
                 capsule.setState(BOOK_OR_UNBOOK);
             }
+            else if (e.getSource() == frame.groupPanel.getTypeSlide()) {
+                filterGroupByType();
+            }
+            else if (e.getSource() == frame.groupPanel.getDateSlide()) {
+                filterGroupByDate();
+            }
+            else if (e.getSource() == frame.groupPanel.getSessionSlide()) {
+                filterGroupBySession();
+            }
             else if (e.getSource() == frame.groupPanel.getBackbButton()
                   || e.getSource() == frame.individualPanel.getBackbButton()){
                 capsule.setState(GROUP_OR_INDIVIDUAL);
@@ -92,5 +104,44 @@ public class GymMemberApp {
                           && s.getTimeScheduled().isBefore(LocalDateTime.now().plusDays(14))
                           && s.getCapacity() > s.getParticipants().size())
                 .collect(Collectors.toList()));
+        frame.groupPanel.setTypeSlide(capsule.getGroupSessions().stream()
+                        .map(s -> s.getExerciseType().getName())
+                        .collect(Collectors.toSet())
+                        .stream()
+                        .collect(Collectors.toList()), ah);
+//        frame.groupPanel.setDateSlide(capsule.getGroupSessions().stream()
+//                        .map(s -> s.getTimeScheduled().toLocalDate().toString())
+//                        .collect(Collectors.toSet())
+//                        .stream()
+//                        .collect(Collectors.toList()), ah);
+    }
+    
+    private void filterGroupByType(){
+        chosenType = frame.groupPanel.getTypeSlide().getSelectedItem().toString();
+        if (!chosenType.equalsIgnoreCase("Select Workout")){
+            frame.groupPanel.setDateSlide(capsule.getGroupSessions().stream()
+                    .filter(s -> s.getExerciseType().getName().equalsIgnoreCase(chosenType))
+                    .map(m -> m.getTimeScheduled().toLocalDate().toString())
+                    .collect(Collectors.toSet())
+                    .stream()
+                    .collect(Collectors.toList()), ah);
+        }
+    }
+    
+    private void filterGroupByDate(){
+        chosenDate = frame.groupPanel.getDateSlide().getSelectedItem().toString();
+        if (!chosenDate.equalsIgnoreCase("Select Date")){
+            frame.groupPanel.setSessionSlide(capsule.getGroupSessions().stream()
+                    .filter(s -> s.getExerciseType().getName().equalsIgnoreCase(chosenType))
+                    .filter(t -> t.getTimeScheduled().toLocalDate().toString().equalsIgnoreCase(chosenDate))
+                    .map(r -> r.getTimeScheduled().toLocalTime().toString() + " - " +
+                              r.getHall().getName() + " - " +
+                              r.getTrainer().getName())
+                    .collect(Collectors.toList()), ah);
+        }
+    }
+    
+    private void filterGroupBySession(){
+        
     }
 }

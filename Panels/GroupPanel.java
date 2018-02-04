@@ -10,17 +10,21 @@ public class GroupPanel extends SuperPanel{
 
     String[] types;
     String[] dates;
+    String[] sessions;
     JComboBox<String> typeSlide;
     JComboBox<String> dateSlide;
-    JComboBox<String> sessions;
+    JComboBox<String> sessionSlide;
     JLabel midLabel;
     JButton confirmButton;
     JButton backbButton;
 
     public GroupPanel() {
-        types = new String[0];
-        dates = new String[0];
-        this.sessions = new JComboBox<>();
+        this.types = new String[0];
+        this.dates = new String[0];
+        this.sessions = new String[0];
+        this.typeSlide = new JComboBox<>(types);
+        this.dateSlide = new JComboBox<>(dates);
+        this.sessionSlide = new JComboBox<>(sessions);
         this.midLabel = new JLabel();
         this.confirmButton = new JButton("Book Workout");
         this.backbButton = new JButton("Back");
@@ -32,10 +36,13 @@ public class GroupPanel extends SuperPanel{
         setBackground(background);
         confirmButton.setFont(new Font("SansSerif", 1, 18));
         backbButton.setFont(new Font("SansSerif", 1, 18));
-        add(sessions);
+        add(typeSlide);
+        add(dateSlide);
+        add(sessionSlide);
         add(midLabel);
         add(confirmButton);
         add(backbButton);
+        confirmButton.setVisible(false);
     }
 
     @Override
@@ -60,20 +67,56 @@ public class GroupPanel extends SuperPanel{
         this.backbButton = backbButton;
     }
 
-    public void setTypeSlide(List<String> types) {
-        types.add(0, "Any Workout");
-        this.types = types.toArray(this.types);
-        this.typeSlide = new JComboBox<>(this.types);
+    public void setTypeSlide(List<String> available, ActionListener al) {
+        remove(typeSlide);
+        available.add(0, "Select Workout");
+        typeSlide = null;
+        types = new String[available.size()];
+        types = available.toArray(types);
+        typeSlide = new JComboBox<>(types);
+        typeSlide.addActionListener(al);
+        add(typeSlide, 0);
+        revalidate();
     }
 
-    public void setDateSlide(List<String> dates) {
-        dates.add(0, "Any Date");
-        this.dates = dates.toArray(this.dates);
-        this.dateSlide = new JComboBox<>(this.dates);
+    public void setDateSlide(List<String> avaliable, ActionListener al) {
+        remove(dateSlide);
+        avaliable.add(0, "Select Date");
+        dates = new String[avaliable.size()];
+        dates = avaliable.toArray(dates);
+        dateSlide = null;
+        dateSlide = new JComboBox<>(dates);
+        dateSlide.addActionListener(al);
+        add(dateSlide, 1);
+        revalidate();
+    }
+
+    public void setSessionSlide(List<String> available, ActionListener al) {
+        remove(sessionSlide);
+        available.add(0, "Select Session");
+        sessions = new String[available.size()];
+        sessions = available.toArray(sessions);
+        sessionSlide = null;
+        sessionSlide = new JComboBox<>(sessions);
+        sessionSlide.addActionListener(al);
+        add(sessionSlide, 2);
+        revalidate();
     }
     
     public void addComboBoxes(){
-        add(typeSlide, 0);
-        add(dateSlide, 1);
     }
+
+    public JComboBox<String> getTypeSlide() {
+        return typeSlide;
+    }
+
+    public JComboBox<String> getDateSlide() {
+        return dateSlide;
+    }
+
+    public JComboBox<String> getSessionSlide() {
+        return sessionSlide;
+    }
+    
+    
 }
