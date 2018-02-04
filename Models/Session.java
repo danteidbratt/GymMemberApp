@@ -4,17 +4,32 @@ import java.time.*;
 
 public abstract class Session {
     
-    private LocalDateTime starts;
+    private int sessionID;
+    private LocalDateTime timeScheduled;
     private Trainer trainer;
     private Duration duration;
     private Hall hall;
 
-    public LocalDateTime getScheduled() {
-        return starts;
+    public Session() {
+        this.trainer = new Trainer();
+        this.duration = new Duration();
+        this.hall = new Hall();
+    }
+    
+    public int getSessionID() {
+        return sessionID;
     }
 
-    public void setScheduled(LocalDateTime scheduled) {
-        this.starts = scheduled;
+    public void setSessionID(int sessionID) {
+        this.sessionID = sessionID;
+    }
+
+    public LocalDateTime getTimeScheduled() {
+        return timeScheduled;
+    }
+
+    public void setTimeScheduled(LocalDateTime timeScheduled) {
+        this.timeScheduled = timeScheduled;
     }
 
     public Trainer getTrainer() {

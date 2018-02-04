@@ -8,8 +8,8 @@ public class Capsule {
     
     private Member member;
     private State state;
-    private List<String> types;
-    private List<String> dates;
+    private List<GroupSession> groupSessions;
+    private List<IndividualSession> individualSessions;
 
     public Capsule() {
         state = LOGIN;
@@ -35,20 +35,20 @@ public class Capsule {
         this.member = member;
     }
 
-    public List<String> getTypes() {
-        return types;
+    public List<GroupSession> getGroupSessions() {
+        return groupSessions;
     }
 
-    public void setTypes(List<String> types) {
-        this.types = types;
+    public void setGroupSessions(List<GroupSession> groupSessions) {
+        this.groupSessions = groupSessions;
     }
 
-    public List<String> getDates() {
-        return dates;
+    public List<IndividualSession> getIndividualSessions() {
+        return individualSessions;
     }
 
-    public void setDates(List<String> dates) {
-        this.dates = dates;
+    public void setIndividualSessions(List<IndividualSession> individualSessions) {
+        this.individualSessions = individualSessions;
     }
 
 }

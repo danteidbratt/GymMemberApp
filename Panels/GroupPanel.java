@@ -32,8 +32,6 @@ public class GroupPanel extends SuperPanel{
         setBackground(background);
         confirmButton.setFont(new Font("SansSerif", 1, 18));
         backbButton.setFont(new Font("SansSerif", 1, 18));
-//        add(typeSlide);
-//        add(dateSlide);
         add(sessions);
         add(midLabel);
         add(confirmButton);

@@ -4,6 +4,7 @@ import Panels.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.*;
 
 public class Frame extends JFrame {
@@ -22,7 +23,6 @@ public class Frame extends JFrame {
     GroupPanel groupPanel;
     IndividualPanel individualPanel;
     List<SuperPanel> allPanels;
-    
 
     public Frame() throws HeadlessException {
         this.topSpace = new JPanel();
@@ -80,8 +80,16 @@ public class Frame extends JFrame {
                 currentPanel = groupOrIndividualPanel;
                 break;
             case GROUP:
-                groupPanel.setTypeSlide(capsule.getTypes());
-                groupPanel.setDateSlide(capsule.getDates());
+                groupPanel.setTypeSlide(capsule.getGroupSessions().stream()
+                        .map(s -> s.getExerciseType().getName())
+                        .collect(Collectors.toSet())
+                        .stream()
+                        .collect(Collectors.toList()));
+                groupPanel.setDateSlide(capsule.getGroupSessions().stream()
+                        .map(s -> s.getTimeScheduled().toLocalDate().toString())
+                        .collect(Collectors.toSet())
+                        .stream()
+                        .collect(Collectors.toList()));
                 groupPanel.addComboBoxes();
                 currentPanel = groupPanel;
                 break;

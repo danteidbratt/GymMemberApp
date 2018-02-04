@@ -1,10 +1,27 @@
 package Models;
 
-public class GroupSession {
+import java.util.ArrayList;
+import java.util.List;
+
+public class GroupSession extends Session{
     
+    private int groupSessionID;
     private int capacity;
-    private Session session;
     private ExerciseType exerciseType;
+    private List<Member> participants;
+
+    public GroupSession() {
+        this.exerciseType = new ExerciseType();
+        this.participants = new ArrayList<>();
+    }
+    
+    public int getGroupSessionID() {
+        return groupSessionID;
+    }
+
+    public void setGroupSessionID(int groupSessionID) {
+        this.groupSessionID = groupSessionID;
+    }
 
     public int getCapacity() {
         return capacity;
@@ -12,14 +29,6 @@ public class GroupSession {
 
     public void setCapacity(int capacity) {
         this.capacity = capacity;
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
     }
 
     public ExerciseType getExerciseType() {
@@ -30,4 +39,12 @@ public class GroupSession {
         this.exerciseType = exerciseType;
     }
 
+    public List<Member> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<Member> participants) {
+        this.participants = participants;
+    }
+    
 }

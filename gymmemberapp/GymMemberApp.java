@@ -3,6 +3,7 @@ package gymmemberapp;
 import static gymmemberapp.Capsule.State.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -86,9 +87,10 @@ public class GymMemberApp {
     
     private void bookGroup(){
         capsule.setState(GROUP);
-        capsule.setTypes(repository.getExerciseTypes("").stream().map(e -> e.getName()).collect(Collectors.toList()));
-        List<String> a = new ArrayList<>();
-        a.add("Tja");
-        capsule.setDates(a);
+        capsule.setGroupSessions(repository.getGroupSessions().stream()
+                .filter(s -> s.getTimeScheduled().isAfter(LocalDateTime.now()) 
+                          && s.getTimeScheduled().isBefore(LocalDateTime.now().plusDays(14))
+                          && s.getCapacity() > s.getParticipants().size())
+                .collect(Collectors.toList()));
     }
 }
