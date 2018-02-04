@@ -117,4 +117,18 @@ public class GroupPanel extends SuperPanel{
     public JComboBox<String> getSessionSlide() {
         return sessionSlide;
     }
+    
+    public void resetDateSlide(){
+        remove(dateSlide);
+        dateSlide = new JComboBox<>(new String[1]);
+        add(dateSlide, 1);
+        confirmButton.setVisible(false);
+    }
+    
+    public void resetSessionSlide(){
+        remove(sessionSlide);
+        sessionSlide = new JComboBox<>(new String[1]);
+        add(sessionSlide, 2);
+        confirmButton.setVisible(false);
+    }
 }

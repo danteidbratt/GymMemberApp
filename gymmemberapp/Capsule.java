@@ -12,6 +12,7 @@ public class Capsule {
     private List<IndividualSession> individualSessions;
 
     public Capsule() {
+        member = new Member();
         state = LOGIN;
     }
     

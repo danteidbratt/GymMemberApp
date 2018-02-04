@@ -88,6 +88,9 @@ public class GymMemberApp {
                   || e.getSource() == frame.individualPanel.getBackbButton()){
                 capsule.setState(GROUP_OR_INDIVIDUAL);
             }
+            else if (e.getSource() == frame.viewReservationsPanel.getFutureSessionSlide()) {
+                
+            }
             else if (e.getSource() == frame.viewReservationsPanel.getBackbButton()) {
                 capsule.setState(BOOK_OR_UNBOOK);
             }
@@ -133,6 +136,8 @@ public class GymMemberApp {
                         .collect(Collectors.toSet())
                         .stream()
                         .collect(Collectors.toList()), ah);
+        frame.groupPanel.resetDateSlide();
+        frame.groupPanel.resetSessionSlide();
     }
     
     private void filterGroupByType(){
@@ -145,6 +150,7 @@ public class GymMemberApp {
                     .stream()
                     .collect(Collectors.toList()), ah);
         }
+        frame.groupPanel.resetSessionSlide();
     }
     
     private void filterGroupByDate(){
@@ -153,15 +159,16 @@ public class GymMemberApp {
             frame.groupPanel.setSessionSlide(capsule.getGroupSessions().stream()
                     .filter(s -> s.getExerciseType().getName().equalsIgnoreCase(chosenType))
                     .filter(t -> t.getTimeSpan().getStart().toLocalDate().toString().equalsIgnoreCase(chosenDate))
-                    .map(r -> r.getTimeSpan().getStart().toLocalTime().toString() + " - " +
-                              r.getHall().getName() + " - " +
+                    .map(r -> r.getTimeSpan().getStart().toLocalTime().toString() + " / " +
+                              r.getHall().getName() + " / " +
                               r.getTrainer().getName())
                     .collect(Collectors.toList()), ah);
         }
+        frame.groupPanel.getConfirmButton().setVisible(false);
     }
     
     private void filterGroupBySession(){
-        String[] inputs = frame.groupPanel.getSessionSlide().getSelectedItem().toString().split("\\s-\\s");
+        String[] inputs = frame.groupPanel.getSessionSlide().getSelectedItem().toString().split("\\s/\\s");
         chosenTime = inputs[0].trim();
         chosenHall = inputs[1].trim();
         chosenTrainer = inputs[2].trim();
@@ -185,21 +192,22 @@ public class GymMemberApp {
         else {
             JOptionPane.showMessageDialog(null, "Reservation Failed\nPlease try again");
         }
+        capsule.getMember().setGroupSessions(repository.getGroupSessionsInMember(String.valueOf(capsule.getMember().getID())));
     }
     
     private void viewReservations(){
         capsule.setState(VIEW_RESERVATIONS);
         frame.viewReservationsPanel.setFutureGroupSessionSlide(capsule.getMember().getGroupSessions().stream()
                 .filter(a -> a.getTimeSpan().getStart().isAfter(LocalDateTime.now()))
-                .map(b -> b.getExerciseType().getName() + " - "
-                        + b.getTimeSpan().getStart().toString() + " - "
-                        + b.getHall().getName() + " - "
+                .map(b -> b.getExerciseType().getName() + " / "
+                        + b.getTimeSpan().getStart().toString().replace('T', ' ') + " / "
+                        + b.getHall().getName() + " / "
                         + b.getTrainer().getName()).collect(Collectors.toList()), ah);
         frame.viewReservationsPanel.setPastSessionSlide(capsule.getMember().getGroupSessions().stream()
                 .filter(a -> a.getTimeSpan().getStart().isBefore(LocalDateTime.now()))
-                .map(b -> b.getExerciseType().getName() + " - "
-                        + b.getTimeSpan().getStart().toString() + " - "
-                        + b.getHall().getName() + " - "
+                .map(b -> b.getExerciseType().getName() + " / "
+                        + b.getTimeSpan().getStart().toString().replace('T', ' ') + " / "
+                        + b.getHall().getName() + " / "
                         + b.getTrainer().getName()).collect(Collectors.toList()), ah);
     }
     

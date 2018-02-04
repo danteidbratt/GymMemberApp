@@ -75,5 +75,13 @@ public class ViewReservationsPanel extends SuperPanel {
     public JButton getBackbButton() {
         return backbButton;
     }
+
+    public JComboBox<String> getFutureSessionSlide() {
+        return futureSessionSlide;
+    }
+
+    public JComboBox<String> getPastSessionSlide() {
+        return pastSessionSlide;
+    }
     
 }
