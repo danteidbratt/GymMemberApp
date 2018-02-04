@@ -1,29 +1,36 @@
 package gymmemberapp;
 
-import Models.GroupSession;
+import Models.TimeSpan;
 import static gymmemberapp.Capsule.State.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.swing.JOptionPane;
 
 public class GymMemberApp {
 
-    Frame frame;
-    Repository repository;
-    Capsule capsule;
-    ActionHandler ah;
-    String chosenType;
-    String chosenDate;
-    String chosenSession;
+    private final Frame frame;
+    private final Repository repository;
+    private final Capsule capsule;
+    private final ActionHandler ah;
+    private final DateTimeFormatter formatter;
+    private String chosenType;
+    private String chosenDate;
+    private String chosenTime;
+    private String chosenHall;
+    private String chosenTrainer;
+    private String chosenGroupSessionID;
+    private LocalDateTime chosenDateTime;
 
     public GymMemberApp() {
         this.frame = new Frame();
         this.repository = new Repository();
         this.capsule = new Capsule();
         this.ah = new ActionHandler();
+        this.formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     }
 
     public void startApp() {
@@ -71,6 +78,9 @@ public class GymMemberApp {
             else if (e.getSource() == frame.groupPanel.getSessionSlide()) {
                 filterGroupBySession();
             }
+            else if (e.getSource() == frame.groupPanel.getConfirmButton()) {
+                confirmGroupReservation();
+            }
             else if (e.getSource() == frame.groupPanel.getBackbButton()
                   || e.getSource() == frame.individualPanel.getBackbButton()){
                 capsule.setState(GROUP_OR_INDIVIDUAL);
@@ -87,6 +97,7 @@ public class GymMemberApp {
         if (input.length() > 0) {
             try {
                 capsule.setMember(repository.getMembers(input).get(0));
+                capsule.getMember().setGroupSessions(repository.getGroupSessionsInMember(String.valueOf(capsule.getMember().getID())));
                 capsule.setState(BOOK_OR_UNBOOK);
                 frame.loginPanel.getTextField().setText("");
                 frame.loginPanel.getInfoText().setText("");
@@ -99,21 +110,23 @@ public class GymMemberApp {
     
     private void bookGroup(){
         capsule.setState(GROUP);
-        capsule.setGroupSessions(repository.getGroupSessions().stream()
-                .filter(s -> s.getTimeScheduled().isAfter(LocalDateTime.now()) 
-                          && s.getTimeScheduled().isBefore(LocalDateTime.now().plusDays(14))
-                          && s.getCapacity() > s.getParticipants().size())
+        capsule.setGroupSessions(repository.getGroupSessions("").stream()
+                .filter(s -> s.getTimeSpan().getStart().isAfter(LocalDateTime.now()) 
+                          && s.getTimeSpan().getStart().isBefore(LocalDateTime.now().plusDays(14))
+                          && s.getCapacity() > s.getParticipants().size()
+                          && !capsule.getMember().getGroupSessions().stream()
+                                  .map(a -> a.getGroupSessionID())
+                                  .collect(Collectors.toList())
+                                  .contains(s.getGroupSessionID())
+                          && !areSimultaneous(capsule.getMember().getGroupSessions().stream()
+                                              .map(b -> b.getTimeSpan())
+                                              .collect(Collectors.toList()), s.getTimeSpan()))
                 .collect(Collectors.toList()));
         frame.groupPanel.setTypeSlide(capsule.getGroupSessions().stream()
                         .map(s -> s.getExerciseType().getName())
                         .collect(Collectors.toSet())
                         .stream()
                         .collect(Collectors.toList()), ah);
-//        frame.groupPanel.setDateSlide(capsule.getGroupSessions().stream()
-//                        .map(s -> s.getTimeScheduled().toLocalDate().toString())
-//                        .collect(Collectors.toSet())
-//                        .stream()
-//                        .collect(Collectors.toList()), ah);
     }
     
     private void filterGroupByType(){
@@ -121,7 +134,7 @@ public class GymMemberApp {
         if (!chosenType.equalsIgnoreCase("Select Workout")){
             frame.groupPanel.setDateSlide(capsule.getGroupSessions().stream()
                     .filter(s -> s.getExerciseType().getName().equalsIgnoreCase(chosenType))
-                    .map(m -> m.getTimeScheduled().toLocalDate().toString())
+                    .map(m -> m.getTimeSpan().getStart().toLocalDate().toString())
                     .collect(Collectors.toSet())
                     .stream()
                     .collect(Collectors.toList()), ah);
@@ -133,8 +146,8 @@ public class GymMemberApp {
         if (!chosenDate.equalsIgnoreCase("Select Date")){
             frame.groupPanel.setSessionSlide(capsule.getGroupSessions().stream()
                     .filter(s -> s.getExerciseType().getName().equalsIgnoreCase(chosenType))
-                    .filter(t -> t.getTimeScheduled().toLocalDate().toString().equalsIgnoreCase(chosenDate))
-                    .map(r -> r.getTimeScheduled().toLocalTime().toString() + " - " +
+                    .filter(t -> t.getTimeSpan().getStart().toLocalDate().toString().equalsIgnoreCase(chosenDate))
+                    .map(r -> r.getTimeSpan().getStart().toLocalTime().toString() + " - " +
                               r.getHall().getName() + " - " +
                               r.getTrainer().getName())
                     .collect(Collectors.toList()), ah);
@@ -142,6 +155,37 @@ public class GymMemberApp {
     }
     
     private void filterGroupBySession(){
-        
+        String[] inputs = frame.groupPanel.getSessionSlide().getSelectedItem().toString().split("\\s-\\s");
+        chosenTime = inputs[0].trim();
+        chosenHall = inputs[1].trim();
+        chosenTrainer = inputs[2].trim();
+        chosenDateTime = LocalDateTime.parse(chosenDate + " " + chosenTime + ":00", formatter);
+        chosenGroupSessionID = String.valueOf(capsule.getGroupSessions().stream()
+                .filter(a -> a.getExerciseType().getName().equalsIgnoreCase(chosenType)
+                        && a.getHall().getName().equalsIgnoreCase(chosenHall)
+                        && a.getTimeSpan().getStart().equals(chosenDateTime)
+                        && a.getTrainer().getName().equalsIgnoreCase(chosenTrainer))
+                .collect(Collectors.toList())
+                .get(0).getGroupSessionID());
+        frame.groupPanel.getConfirmButton().setVisible(true);
+    }
+    
+    private void confirmGroupReservation(){
+        capsule.setState(BOOK_OR_UNBOOK);
+        frame.updateFrame(capsule);
+        if (repository.makeGroupSessionReservation(String.valueOf(capsule.getMember().getID()), chosenGroupSessionID) == 1) {
+            JOptionPane.showMessageDialog(null, "Reservation Confirmed!");
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Reservation Failed\nPlease try again");
+        }
+    }
+    
+    private boolean areSimultaneous(List<TimeSpan> x1, TimeSpan x2){
+        for (TimeSpan t : x1) {
+            if((t.getStart().isAfter(x2.getStart()) && t.getStart().isBefore(x2.getFinish())) || (t.getFinish().isAfter(x2.getStart()) && t.getFinish().isBefore(x2.getFinish())))
+                return true;
+        }
+        return false;
     }
 }

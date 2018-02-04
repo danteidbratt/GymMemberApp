@@ -14,6 +14,7 @@ public class BookOrUnbookPanel extends SuperPanel{
     JLabel midLabel;
     JButton unbookButton;
     JLabel botLabel;
+    JButton viewReservationsButton;
     JButton signOutButton;
     List<JButton> allButtons;
 
@@ -22,9 +23,10 @@ public class BookOrUnbookPanel extends SuperPanel{
         this.bookButton = new JButton("Book Workout");
         this.midLabel = new JLabel();
         this.unbookButton = new JButton("Unbook Workout");
+        this.viewReservationsButton = new JButton("View Reservations");
         this.botLabel = new JLabel();
         this.signOutButton = new JButton("Sign out");
-        this.allButtons = Arrays.asList(bookButton, unbookButton, signOutButton);
+        this.allButtons = Arrays.asList(bookButton, unbookButton, viewReservationsButton, signOutButton);
     }
     
     
@@ -38,7 +40,7 @@ public class BookOrUnbookPanel extends SuperPanel{
         add(topLabel);
         add(bookButton);
         add(unbookButton);
-        add(midLabel);
+        add(viewReservationsButton);
         add(signOutButton);
     }
 

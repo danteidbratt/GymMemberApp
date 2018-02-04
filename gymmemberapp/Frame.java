@@ -44,7 +44,7 @@ public class Frame extends JFrame {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(350, 500));
         setBackground(background);
-        logo.setText("Best Gym Ever");
+        logo.setText("- Best Gym Ever -");
         logo.setBackground(background);
         logo.setFont(new Font("SansSarif", 1, 30));
         logo.setHorizontalAlignment(SwingConstants.CENTER);

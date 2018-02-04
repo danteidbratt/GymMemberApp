@@ -20,17 +20,18 @@ public class Repository {
         }
     }
 
-    public List<Member> getMembers(String name){
+    public List<Member> getMembers(String nameID){
         List<Member> members = new ArrayList<>();
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
-            PreparedStatement stmt = con.prepareStatement(allOrOne("select * from member", name))){
-            if(name.length() > 0)
-                stmt.setString(1, name);
+            PreparedStatement stmt = con.prepareStatement(allOrOne("select * from member", nameID))){
+            if(nameID.length() > 0)
+                stmt.setString(1, nameID);
             ResultSet rs = stmt.executeQuery();
             while(rs.next()){
                 Member temp = new Member();
                 temp.setName(rs.getString("name"));
                 temp.setID(rs.getInt("ID"));
+//                temp.setGroupSessions(getGroupSessionsInMember(String.valueOf(temp.getID())));
                 members.add(temp);
             }
         } catch (SQLException e) {
@@ -39,12 +40,12 @@ public class Repository {
         return members;
     }
     
-    public List<ExerciseType> getExerciseTypes(String name){
+    public List<ExerciseType> getExerciseTypes(String nameID){
         List<ExerciseType> exerciseTypes = new ArrayList<>();
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
-            PreparedStatement stmt = con.prepareStatement(allOrOne("select * from exerciseType", name))){
-            if(name.length() > 0)
-                stmt.setString(1, name);
+            PreparedStatement stmt = con.prepareStatement(allOrOne("select * from exerciseType", nameID))){
+            if(nameID.length() > 0)
+                stmt.setString(1, nameID);
             ResultSet rs = stmt.executeQuery();
             while(rs.next()){
                 ExerciseType temp = new ExerciseType();
@@ -57,7 +58,7 @@ public class Repository {
         return exerciseTypes;
     }
     
-    public List<GroupSession> getGroupSessions(){
+    public List<GroupSession> getGroupSessions(String groupSessionID){
         List<GroupSession> groupSessions = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String query = "select groupSession.ID as 'groupSessionID', " +
@@ -73,20 +74,26 @@ public class Repository {
                        "inner join hall on session.hallID = hall.ID " +
                        "inner join duration on session.durationID = duration.ID " +
                        "inner join trainer on session.trainerID = trainer.ID " +
-                       "inner join exerciseType on groupSession.exerciseTypeID = exerciseType.ID;";
+                       "inner join exerciseType on groupSession.exerciseTypeID = exerciseType.ID";
+        if (groupSessionID.length() > 0)
+            query = query + " where groupSession.ID = ?";
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
             PreparedStatement stmt = con.prepareStatement(query)){
+            if (groupSessionID.length() > 0)
+                stmt.setString(1, groupSessionID);
             ResultSet rs = stmt.executeQuery();
             while(rs.next()){
                 GroupSession temp = new GroupSession();
                 temp.setCapacity(rs.getInt("capacity"));
-                temp.getDuration().setMinutes(rs.getInt("minutes"));
+                temp.setTimeSpan(LocalDateTime.parse(rs.getString("scheduled").substring(0, 19), formatter), rs.getInt("minutes"));
+//                temp.getDuration().setMinutes(rs.getInt("minutes"));
                 temp.getExerciseType().setName(rs.getString("type"));
                 temp.setGroupSessionID(rs.getInt("groupSessionID"));
                 temp.setSessionID(rs.getInt("sessionID"));
                 temp.getHall().setName(rs.getString("hall"));
                 temp.getTrainer().setName(rs.getString("trainer"));
-                temp.setTimeScheduled(LocalDateTime.parse(rs.getString("scheduled").substring(0, 19), formatter));
+//                temp.setTimeScheduled(LocalDateTime.parse(rs.getString("scheduled").substring(0, 19), formatter));
+                temp.setParticipants(getMembersInGroup(String.valueOf(rs.getInt("groupSessionID"))));
                 groupSessions.add(temp);
             }
         } catch (SQLException e) {
@@ -95,9 +102,54 @@ public class Repository {
         return groupSessions;
     }
     
-    public String allOrOne(String query, String name){
-        if(name.length() > 0)
-            return isInteger(name) ? query + " where ID = ?" : query + " where name = ?";
+    private List<Member> getMembersInGroup(String groupSessionID){
+        List<Member> membersInGroup = new ArrayList<>();
+        String query = "select * from booking where groupSessionID = ?";
+        try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
+            PreparedStatement stmt = con.prepareStatement(query)){
+            stmt.setString(1, groupSessionID);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()){
+                membersInGroup.add(getMembers(String.valueOf(rs.getInt("memberID"))).get(0));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return membersInGroup;
+    }
+    
+    public List<GroupSession> getGroupSessionsInMember(String memberID){
+        List<GroupSession> groupSessionsInMember = new ArrayList<>();
+        String query = "select groupSessionID as 'groupSessionID' from booking where memberID = ?";
+        try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
+            PreparedStatement stmt = con.prepareStatement(query)){
+            stmt.setString(1, memberID);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()){
+                groupSessionsInMember.add(getGroupSessions(String.valueOf(rs.getInt("groupSessionID"))).get(0));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return groupSessionsInMember;
+    }
+    
+    public int makeGroupSessionReservation(String memberID, String groupSessionID){
+        String query = "insert into booking (memberID, groupSessionID) values (?,?)";
+        try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
+            PreparedStatement stmt = con.prepareStatement(query)){
+            stmt.setString(1, memberID);
+            stmt.setString(2, groupSessionID);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+    
+    public String allOrOne(String query, String nameID){
+        if(nameID.length() > 0)
+            return isInteger(nameID) ? query + " where ID = ?" : query + " where name = ?";
         return query;
     }
     
@@ -109,5 +161,4 @@ public class Repository {
         }
         return true;
     }
-    
 }

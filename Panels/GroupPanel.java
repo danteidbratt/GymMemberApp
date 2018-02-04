@@ -117,6 +117,4 @@ public class GroupPanel extends SuperPanel{
     public JComboBox<String> getSessionSlide() {
         return sessionSlide;
     }
-    
-    
 }
