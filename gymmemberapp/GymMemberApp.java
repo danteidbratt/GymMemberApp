@@ -88,8 +88,8 @@ public class GymMemberApp {
                   || e.getSource() == frame.individualPanel.getBackbButton()){
                 capsule.setState(GROUP_OR_INDIVIDUAL);
             }
-            else if (e.getSource() == frame.viewReservationsPanel.getFutureSessionSlide()) {
-                
+            else if (e.getSource() == frame.viewReservationsPanel.getFutureGroupSessionSlide()) {
+                frame.viewReservationsPanel.getRemoveGroupButton().setVisible(true);
             }
             else if (e.getSource() == frame.viewReservationsPanel.getBackbButton()) {
                 capsule.setState(BOOK_OR_UNBOOK);
@@ -219,4 +219,5 @@ public class GymMemberApp {
         }
         return false;
     }
+    
 }

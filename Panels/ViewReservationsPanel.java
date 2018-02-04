@@ -10,78 +10,92 @@ import javax.swing.JLabel;
 
 public class ViewReservationsPanel extends SuperPanel {
 
-    JComboBox<String> futureSessionSlide;
-    JComboBox<String> pastSessionSlide;
+    JComboBox<String> futureGroupSessionSlide;
+    JComboBox<String> pastGroupSessionSlide;
+    JComboBox<String> futureIndividualSessionSlide;
+    JComboBox<String> pastIndividualSessionSlide;
     JLabel midLabel;
-    JButton removeButton;
+    JButton removeGroupButton;
+    JButton removeIndividualButton;
     JButton backbButton;
 
     public ViewReservationsPanel() {
-        this.futureSessionSlide = new JComboBox<>(new String[1]);
-        this.pastSessionSlide = new JComboBox<>(new String[1]);
+        this.futureGroupSessionSlide = new JComboBox<>(new String[1]);
+        this.pastGroupSessionSlide = new JComboBox<>(new String[1]);
+        this.futureIndividualSessionSlide = new JComboBox<>(new String[1]);
+        this.pastIndividualSessionSlide = new JComboBox<>(new String[1]);
         this.midLabel = new JLabel();
-        this.removeButton = new JButton("Remove Reservation");
+        this.removeGroupButton = new JButton("Remove Group Reservation");
+        this.removeIndividualButton = new JButton("Remove Individual Reservation");
         this.backbButton = new JButton("Back");
     }
     
     @Override
     public void setupPanel() {
-        setLayout(new GridLayout(5, 1, 20, 10));
+        setLayout(new GridLayout(6, 1, 20, 10));
         setBackground(background);
-        removeButton.setFont(new Font("SansSerif", 1, 18));
+        removeGroupButton.setFont(new Font("SansSerif", 1, 18));
         backbButton.setFont(new Font("SansSerif", 1, 18));
-        add(futureSessionSlide);
-        add(pastSessionSlide);
-        add(midLabel);
-        add(removeButton);
+        add(futureGroupSessionSlide);
+        add(pastGroupSessionSlide);
+        add(futureIndividualSessionSlide);
+        add(pastIndividualSessionSlide);
         add(backbButton);
-        removeButton.setVisible(false);
+        removeGroupButton.setVisible(false);
     }
 
     @Override
     public void setActionListeners(ActionListener al) {
-        removeButton.addActionListener(al);
+        removeGroupButton.addActionListener(al);
         backbButton.addActionListener(al);
     }
     
     public void setFutureGroupSessionSlide(List<String> available, ActionListener al) {
-        remove(futureSessionSlide);
+        remove(futureGroupSessionSlide);
         available.add(0, "Upcoming Workouts");
         String[] sessions = new String[available.size()];
         sessions = available.toArray(sessions);
-        futureSessionSlide = null;
-        futureSessionSlide = new JComboBox<>(sessions);
-        futureSessionSlide.addActionListener(al);
-        add(futureSessionSlide, 0);
+        futureGroupSessionSlide = null;
+        futureGroupSessionSlide = new JComboBox<>(sessions);
+        futureGroupSessionSlide.addActionListener(al);
+        add(futureGroupSessionSlide, 0);
         revalidate();
     }
     
     public void setPastSessionSlide(List<String> available, ActionListener al) {
-        remove(pastSessionSlide);
+        remove(pastGroupSessionSlide);
         available.add(0, "Past Workouts");
         String[] sessions = new String[available.size()];
         sessions = available.toArray(sessions);
-        pastSessionSlide = null;
-        pastSessionSlide = new JComboBox<>(sessions);
-        pastSessionSlide.addActionListener(al);
-        add(pastSessionSlide, 1);
+        pastGroupSessionSlide = null;
+        pastGroupSessionSlide = new JComboBox<>(sessions);
+        pastGroupSessionSlide.addActionListener(al);
+        add(pastGroupSessionSlide, 1);
         revalidate();
     }
 
-    public JButton getRemoveButton() {
-        return removeButton;
+    public JButton getRemoveGroupButton() {
+        return removeGroupButton;
     }
 
     public JButton getBackbButton() {
         return backbButton;
     }
 
-    public JComboBox<String> getFutureSessionSlide() {
-        return futureSessionSlide;
+    public JComboBox<String> getFutureGroupSessionSlide() {
+        return futureGroupSessionSlide;
     }
 
-    public JComboBox<String> getPastSessionSlide() {
-        return pastSessionSlide;
+    public JComboBox<String> getPastGroupSessionSlide() {
+        return pastGroupSessionSlide;
+    }
+    
+    public void showRemoveGroupButton(){
+        
+    }
+    
+    public void showRemoveIndividualButton(){
+        
     }
     
 }
