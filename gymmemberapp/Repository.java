@@ -225,7 +225,7 @@ public class Repository {
     }
     
     public int makeIndividualSessionReservation(String memberID, String individualSessionID) {
-        String query = "update individualSession set memberID = ? where ID = ? and attendance = 0";
+        String query = "update individualSession set memberID = ? where ID = ? and memberID is null";
         int rowsAffected = -1;
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
             PreparedStatement stmt = con.prepareStatement(query)){
