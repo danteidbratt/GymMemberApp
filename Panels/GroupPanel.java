@@ -134,13 +134,19 @@ public class GroupPanel extends SuperPanel{
         remove(dateSlide);
         dateSlide = new JComboBox<>(new String[1]);
         add(dateSlide, 1);
-        confirmButton.setVisible(false);
     }
     
     public void resetSessionSlide(){
         remove(sessionSlide);
         sessionSlide = new JComboBox<>(new String[1]);
         add(sessionSlide, 2);
+    }
+    
+    public void showConfirmButton(){
+        confirmButton.setVisible(true);
+    }
+    
+    public void hideConfirmButton(){
         confirmButton.setVisible(false);
     }
 }

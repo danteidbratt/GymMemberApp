@@ -1,6 +1,5 @@
 package gymmemberapp;
 
-import Models.IndividualSession;
 import Models.TimeSpan;
 import static gymmemberapp.Capsule.State.*;
 import java.awt.event.ActionEvent;
@@ -24,6 +23,7 @@ public class GymMemberApp {
     private String chosenHall;
     private String chosenTrainer;
     private String chosenGroupSessionID;
+    private String chosenIndividualSessionID;
     private LocalDateTime chosenDateTime;
 
     public GymMemberApp() {
@@ -85,21 +85,35 @@ public class GymMemberApp {
             else if (e.getSource() == frame.groupPanel.getConfirmButton()) {
                 confirmGroupReservation();
             }
-            else if (e.getSource() == frame.groupPanel.getBackbButton()
-                  || e.getSource() == frame.individualPanel.getBackbButton()){
-                capsule.setState(GROUP_OR_INDIVIDUAL);
+            else if (e.getSource() == frame.individualPanel.getDateSlide()) {
+                filterIndividualByDate();
+            }
+            else if (e.getSource() == frame.individualPanel.getSessionSlide()) {
+                filterIndividualBySession();
+            }
+            else if (e.getSource() == frame.individualPanel.getConfirmButton()) {
+                confirmIndividualReservation();
+            }
+            else if (e.getSource() == frame.groupPanel.getBackbButton()) {
+                backFromGroup();
+            }
+            else if (e.getSource() == frame.individualPanel.getBackbButton()) {
+                backFromIndividual();
             }
             else if (e.getSource() == frame.viewReservationsPanel.getReservedGroupSessionSlide()) {
-                removeGroupSession();
+                selectReservedGroupSession();
             }
             else if (e.getSource() == frame.viewReservationsPanel.getReservedIndividualSessionSlide()) {
-                removeIndividualSession();
+                selectReservedIndividualSession();
             }
             else if (e.getSource() == frame.viewReservationsPanel.getRemoveGroupButton()) {
                 executeGroupSessionRemoval();
             }
+            else if (e.getSource() == frame.viewReservationsPanel.getRemoveIndividualButton()) {
+                executeIndividualSessionRemoval();
+            }
             else if (e.getSource() == frame.viewReservationsPanel.getBackbButton()) {
-                capsule.setState(BOOK_OR_UNBOOK);
+                backFromViewReservations();
             }
             else if (e.getSource() == frame.loginPanel.getExitButton()) {
                 System.exit(0);
@@ -137,6 +151,9 @@ public class GymMemberApp {
                                   .contains(s.getGroupSessionID())
                           && !areSimultaneous(capsule.getMember().getGroupSessions().stream()
                                               .map(b -> b.getTimeSpan())
+                                              .collect(Collectors.toList()), s.getTimeSpan())
+                          && !areSimultaneous(capsule.getMember().getIndividualSessions().stream()
+                                              .map(b -> b.getTimeSpan())
                                               .collect(Collectors.toList()), s.getTimeSpan()))
                 .collect(Collectors.toList()));
         frame.groupPanel.setTypeSlide(capsule.getGroupSessions().stream()
@@ -153,7 +170,13 @@ public class GymMemberApp {
         capsule.setIndividualSessions(repository.getIndividualSessions("").stream()
                 .filter(a -> a.getTimeSpan().getStart().isAfter(LocalDateTime.now())
                           && a.getTimeSpan().getStart().isBefore(LocalDateTime.now().plusDays(14))
-                          && a.getMember() == null)
+                          && a.getMember() == null
+                          && !areSimultaneous(capsule.getMember().getGroupSessions().stream()
+                                              .map(b -> b.getTimeSpan())
+                                              .collect(Collectors.toList()), a.getTimeSpan())
+                          && !areSimultaneous(capsule.getMember().getIndividualSessions().stream()
+                                              .map(b -> b.getTimeSpan())
+                                              .collect(Collectors.toList()), a.getTimeSpan()))
                 .collect(Collectors.toList()));
         frame.individualPanel.setDateSlide(capsule.getIndividualSessions().stream()
                 .map(a -> a.getTimeSpan().getStart().toLocalDate().toString())
@@ -163,8 +186,8 @@ public class GymMemberApp {
     }
     
     private void filterGroupByType(){
-        chosenType = frame.groupPanel.getTypeSlide().getSelectedItem().toString();
-        if (!chosenType.equalsIgnoreCase("Select Workout")){
+        if (frame.groupPanel.getTypeSlide().getSelectedIndex() > 0){
+            chosenType = frame.groupPanel.getTypeSlide().getSelectedItem().toString();
             frame.groupPanel.setDateSlide(capsule.getGroupSessions().stream()
                     .filter(s -> s.getExerciseType().getName().equalsIgnoreCase(chosenType))
                     .map(m -> m.getTimeSpan().getStart().toLocalDate().toString())
@@ -172,13 +195,16 @@ public class GymMemberApp {
                     .stream()
                     .collect(Collectors.toList()), ah);
         }
+        else {
+            frame.groupPanel.resetDateSlide();
+        }
         frame.groupPanel.resetSessionSlide();
         frame.groupPanel.hideChoice();
     }
     
     private void filterGroupByDate(){
-        chosenDate = frame.groupPanel.getDateSlide().getSelectedItem().toString();
-        if (!chosenDate.equalsIgnoreCase("Select Date")){
+        if (frame.groupPanel.getDateSlide().getSelectedIndex() > 0){
+            chosenDate = frame.groupPanel.getDateSlide().getSelectedItem().toString();
             frame.groupPanel.setSessionSlide(capsule.getGroupSessions().stream()
                     .filter(s -> s.getExerciseType().getName().equalsIgnoreCase(chosenType))
                     .filter(t -> t.getTimeSpan().getStart().toLocalDate().toString().equalsIgnoreCase(chosenDate))
@@ -187,7 +213,10 @@ public class GymMemberApp {
                               r.getTrainer().getName())
                     .collect(Collectors.toList()), ah);
         }
-        frame.groupPanel.getConfirmButton().setVisible(false);
+        else {
+            frame.groupPanel.resetSessionSlide();
+        }
+        frame.groupPanel.hideConfirmButton();
         frame.groupPanel.hideChoice();
     }
     
@@ -205,7 +234,7 @@ public class GymMemberApp {
                             && a.getTrainer().getName().equalsIgnoreCase(chosenTrainer))
                     .collect(Collectors.toList())
                     .get(0).getGroupSessionID());
-            frame.groupPanel.getConfirmButton().setVisible(true);
+            frame.groupPanel.showConfirmButton();
             frame.groupPanel.displayChoice();
         }
     }
@@ -220,7 +249,60 @@ public class GymMemberApp {
             JOptionPane.showMessageDialog(null, "Reservation Failed\nPlease try again");
         }
         capsule.getMember().setGroupSessions(repository.getGroupSessionsInMember(String.valueOf(capsule.getMember().getID())));
+        frame.groupPanel.resetDateSlide();
+        frame.groupPanel.resetSessionSlide();
         frame.groupPanel.hideChoice();
+        frame.groupPanel.hideConfirmButton();
+    }
+    
+    private void filterIndividualByDate() {
+        if (frame.individualPanel.getDateSlide().getSelectedIndex() > 0){
+            chosenDate = frame.individualPanel.getDateSlide().getSelectedItem().toString();
+            frame.individualPanel.setSessionSlide(capsule.getIndividualSessions().stream()
+                    .filter(t -> t.getTimeSpan().getStart().toLocalDate().toString().equalsIgnoreCase(chosenDate))
+                    .map(r -> r.getTimeSpan().getStart().toLocalTime().toString() + " / " +
+                              r.getHall().getName() + " / " +
+                              r.getTrainer().getName() + " / " +
+                              r.getTimeSpan().getMinutes() + "min")
+                    .collect(Collectors.toList()), ah);
+        }
+        else {
+            frame.individualPanel.resetSessionSlide();
+        }
+        frame.individualPanel.hideConfirmButton();
+        frame.individualPanel.hideChoice();
+    }
+    
+    private void filterIndividualBySession() {
+        if (frame.individualPanel.getSessionSlide().getSelectedIndex() > 0) {
+            String[] inputs = frame.individualPanel.getSessionSlide().getSelectedItem().toString().split("\\s/\\s");
+            chosenDateTime = LocalDateTime.parse(chosenDate + " " + inputs[0].trim() + ":00", formatter);
+            chosenHall = inputs[1].trim();
+            chosenTrainer = inputs[2].trim();
+            chosenIndividualSessionID = String.valueOf(capsule.getIndividualSessions().stream()
+                    .filter(a -> a.getHall().getName().equalsIgnoreCase(chosenHall)
+                              && a.getTrainer().getName().equalsIgnoreCase(chosenTrainer)
+                              && a.getTimeSpan().getStart().equals(chosenDateTime))
+                    .collect(Collectors.toList())
+                    .get(0).getIndividualSessionID());
+            frame.individualPanel.displayChoice();
+            frame.individualPanel.showConfirmButton();
+        }
+    }
+    
+    private void confirmIndividualReservation() {
+        capsule.setState(BOOK_OR_UNBOOK);
+        frame.updateFrame(capsule);
+        if (repository.makeIndividualSessionReservation(String.valueOf(capsule.getMember().getID()), chosenIndividualSessionID) == 1) {
+            JOptionPane.showMessageDialog(null, "Reservation Confirmed!");
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Reservation Failed\nPlease try again");
+        }
+        capsule.getMember().setIndividualSessions(repository.getIndividualSessionsInMember(String.valueOf(capsule.getMember().getID())));
+        frame.individualPanel.hideChoice();
+        frame.individualPanel.hideConfirmButton();
+        frame.individualPanel.resetSessionSlide();
     }
     
     private void viewReservations(){
@@ -231,6 +313,12 @@ public class GymMemberApp {
                         + b.getTimeSpan().getStart().toString().replace('T', ' ') + " / "
                         + b.getHall().getName() + " / "
                         + b.getTrainer().getName()).collect(Collectors.toList()), ah);
+        frame.viewReservationsPanel.setReservedIndividualSessionSlide(capsule.getMember().getIndividualSessions().stream()
+                .filter(a -> a.getTimeSpan().getStart().isAfter(LocalDateTime.now()))
+                .map(b -> b.getTimeSpan().getStart().toString().replace('T', ' ') + " / "
+                        + b.getHall().getName() + " / "
+                        + b.getTrainer().getName() + " / "
+                        + b.getTimeSpan().getMinutes() + "min").collect(Collectors.toList()), ah);
     }
     
     private boolean areSimultaneous(List<TimeSpan> x1, TimeSpan x2){
@@ -242,7 +330,7 @@ public class GymMemberApp {
         return false;
     }
     
-    private void removeGroupSession(){
+    private void selectReservedGroupSession(){
         if (frame.viewReservationsPanel.getReservedGroupSessionSlide().getSelectedIndex() > 0){
             String[] inputs = frame.viewReservationsPanel.getReservedGroupSessionSlide().getSelectedItem().toString().split("\\s/\\s");
             chosenType = inputs[0].trim();
@@ -256,19 +344,36 @@ public class GymMemberApp {
                               && a.getTrainer().getName().equalsIgnoreCase(chosenTrainer))
                     .collect(Collectors.toList())
                     .get(0).getGroupSessionID());
-            frame.viewReservationsPanel.resetReservedIndividualSessionSlide();
+            frame.viewReservationsPanel.displayGroupChoice();
             frame.viewReservationsPanel.showRemoveGroupButton();
         }
         else {
             frame.viewReservationsPanel.hideRemoveButtons();
+            frame.viewReservationsPanel.hideChoice();
         }
+        frame.viewReservationsPanel.resetReservedIndividualSessionSlide(ah);
     }
     
-    private void removeIndividualSession(){
+    private void selectReservedIndividualSession(){
         if (frame.viewReservationsPanel.getReservedIndividualSessionSlide().getSelectedIndex() > 0) {
+            String[] inputs = frame.viewReservationsPanel.getReservedIndividualSessionSlide().getSelectedItem().toString().split("\\s/\\s");
+            chosenDateTime = LocalDateTime.parse(inputs[0].trim() + ":00", formatter);
+            chosenHall = inputs[1].trim();
+            chosenTrainer = inputs[2].trim();
+            chosenIndividualSessionID = String.valueOf(capsule.getMember().getIndividualSessions().stream()
+                    .filter(a -> a.getTimeSpan().getStart().equals(chosenDateTime)
+                              && a.getHall().getName().equalsIgnoreCase(chosenHall)
+                              && a.getTrainer().getName().equalsIgnoreCase(chosenTrainer))
+                    .collect(Collectors.toList())
+                    .get(0).getIndividualSessionID());
             frame.viewReservationsPanel.showRemoveIndividualButton();
-            frame.viewReservationsPanel.showRemoveIndividualButton();
+            frame.viewReservationsPanel.displayIndividualChoice();
         }
+        else {
+            frame.viewReservationsPanel.hideRemoveButtons();
+            frame.viewReservationsPanel.hideChoice();
+        }
+        frame.viewReservationsPanel.resetReservedGroupSessionSlide(ah);
     }
     
     private void executeGroupSessionRemoval(){
@@ -280,9 +385,48 @@ public class GymMemberApp {
         else {
             JOptionPane.showMessageDialog(null, "Unable to delete reservation. Please try again");
         }
-        frame.viewReservationsPanel.resetReservedGroupSessionSlide();
-        frame.viewReservationsPanel.resetReservedIndividualSessionSlide();
+        frame.viewReservationsPanel.resetReservedGroupSessionSlide(ah);
+        frame.viewReservationsPanel.resetReservedIndividualSessionSlide(ah);
         frame.viewReservationsPanel.hideRemoveButtons();
+        frame.viewReservationsPanel.hideChoice();
         capsule.getMember().setGroupSessions(repository.getGroupSessionsInMember(String.valueOf(capsule.getMember().getID())));
+    }
+    
+    private void executeIndividualSessionRemoval(){
+        capsule.setState(BOOK_OR_UNBOOK);
+        frame.updateFrame(capsule);
+        if (repository.removeIndividualSession(chosenIndividualSessionID) == 1) {
+            JOptionPane.showMessageDialog(null, "Reservation Deleted");
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Unable to delete reservation. Please try again");
+        }
+        frame.viewReservationsPanel.resetReservedGroupSessionSlide(ah);
+        frame.viewReservationsPanel.resetReservedIndividualSessionSlide(ah);
+        frame.viewReservationsPanel.hideRemoveButtons();
+        frame.viewReservationsPanel.hideChoice();
+        capsule.getMember().setIndividualSessions(repository.getIndividualSessionsInMember(String.valueOf(capsule.getMember().getID())));
+    }
+    
+    private void backFromGroup(){
+        capsule.setState(GROUP_OR_INDIVIDUAL);
+        frame.groupPanel.resetDateSlide();
+        frame.groupPanel.resetSessionSlide();
+        frame.groupPanel.hideChoice();
+        frame.groupPanel.hideConfirmButton();
+    }
+    private void backFromIndividual(){
+        capsule.setState(GROUP_OR_INDIVIDUAL);
+        frame.individualPanel.hideChoice();
+        frame.individualPanel.hideConfirmButton();
+        frame.individualPanel.resetSessionSlide();
+    }
+    
+    private void backFromViewReservations(){
+        capsule.setState(BOOK_OR_UNBOOK);
+        frame.viewReservationsPanel.resetReservedGroupSessionSlide(ah);
+        frame.viewReservationsPanel.resetReservedIndividualSessionSlide(ah);
+        frame.viewReservationsPanel.hideRemoveButtons();
+        frame.viewReservationsPanel.hideChoice();
     }
 }

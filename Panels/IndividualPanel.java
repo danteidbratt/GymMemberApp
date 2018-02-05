@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 public class IndividualPanel extends SuperPanel{
 
@@ -30,11 +31,13 @@ public class IndividualPanel extends SuperPanel{
     public void setupPanel() {
         setLayout(new GridLayout(6, 1, 20, 10));
         setBackground(background);
+        midLabel2.setFont(new Font("SansSerif", 2, 15));
+        midLabel2.setHorizontalAlignment(SwingConstants.CENTER);
         confirmButton.setFont(new Font("SansSerif", 1, 18));
         backbButton.setFont(new Font("SansSerif", 1, 18));
+        add(midLabel1);
         add(dateSlide);
         add(sessionSlide);
-        add(midLabel1);
         add(midLabel2);
         add(confirmButton);
         add(backbButton);
@@ -48,26 +51,26 @@ public class IndividualPanel extends SuperPanel{
     }
     
     public void setDateSlide(List<String> avaliable, ActionListener al) {
-        remove(dateSlide);
+        remove(1);
         avaliable.add(0, "Select Date");
         String[] dates = new String[avaliable.size()];
         dates = avaliable.toArray(dates);
         dateSlide = null;
         dateSlide = new JComboBox<>(dates);
         dateSlide.addActionListener(al);
-        add(dateSlide, 0);
+        add(dateSlide, 1);
         revalidate();
     }
     
     public void setSessionSlide(List<String> avaliable, ActionListener al) {
-        remove(sessionSlide);
+        remove(2);
         avaliable.add(0, "Select Session");
         String[] sessions = new String[avaliable.size()];
         sessions = avaliable.toArray(sessions);
         sessionSlide = null;
         sessionSlide = new JComboBox<>(sessions);
         sessionSlide.addActionListener(al);
-        add(sessionSlide, 1);
+        add(sessionSlide, 2);
         revalidate();
     }
 
@@ -77,6 +80,36 @@ public class IndividualPanel extends SuperPanel{
 
     public JButton getBackbButton() {
         return backbButton;
+    }
+
+    public JComboBox<String> getDateSlide() {
+        return dateSlide;
+    }
+    
+    public void resetSessionSlide(){
+        remove(2);
+        sessionSlide = new JComboBox<>(new String[1]);
+        add(sessionSlide, 2);
+    }
+
+    public JComboBox<String> getSessionSlide() {
+        return sessionSlide;
+    }
+    
+    public void showConfirmButton(){
+        confirmButton.setVisible(true);
+    }
+    
+    public void hideConfirmButton(){
+        confirmButton.setVisible(false);
+    }
+    
+    public void displayChoice(){
+        midLabel2.setText(dateSlide.getSelectedItem().toString() + " / " + sessionSlide.getSelectedItem().toString());
+    }
+    
+    public void hideChoice(){
+        midLabel2.setText("");
     }
     
 }

@@ -202,12 +202,37 @@ public class Repository {
         return -1;
     }
     
+    public int makeIndividualSessionReservation(String memberID, String individualSessionID) {
+        String query = "update individualSession set memberID = ? where ID = ?";
+        try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
+            PreparedStatement stmt = con.prepareStatement(query)){
+            stmt.setString(1, memberID);
+            stmt.setString(2, individualSessionID);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+    
     public int removeGroupSession(String memberID, String groupSessionID){
         String query = "delete from booking where memberID = ? and groupSessionID = ?";
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
             PreparedStatement stmt = con.prepareStatement(query)){
             stmt.setString(1, memberID);
             stmt.setString(2, groupSessionID);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+    
+    public int removeIndividualSession(String individualSessionID){
+        String query = "update individualSession set memberID = null where ID = ?";
+        try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
+            PreparedStatement stmt = con.prepareStatement(query)){
+            stmt.setString(1, individualSessionID);
             return stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

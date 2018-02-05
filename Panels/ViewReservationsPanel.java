@@ -7,12 +7,14 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 public class ViewReservationsPanel extends SuperPanel {
 
     JComboBox<String> reservedGroupSessionSlide;
     JComboBox<String> reservedIndividualSessionSlide;
     JLabel midLabel;
+    JLabel midLabel2;
     JButton removeGroupButton;
     JButton removeIndividualButton;
     JButton backbButton;
@@ -21,6 +23,7 @@ public class ViewReservationsPanel extends SuperPanel {
         this.reservedGroupSessionSlide = new JComboBox<>(new String[1]);
         this.reservedIndividualSessionSlide = new JComboBox<>(new String[1]);
         this.midLabel = new JLabel();
+        this.midLabel2 = new JLabel();
         this.removeGroupButton = new JButton("Remove Reservation");
         this.removeIndividualButton = new JButton("Remove Reservation");
         this.backbButton = new JButton("Back");
@@ -28,13 +31,17 @@ public class ViewReservationsPanel extends SuperPanel {
     
     @Override
     public void setupPanel() {
-        setLayout(new GridLayout(4, 1, 20, 10));
+        setLayout(new GridLayout(5, 1, 20, 10));
         setBackground(background);
         removeGroupButton.setFont(new Font("SansSerif", 1, 18));
+        removeIndividualButton.setFont(new Font("SansSerif", 1, 18));
         backbButton.setFont(new Font("SansSerif", 1, 18));
+        midLabel.setFont(new Font("SansSerif", 2, 15));
+        midLabel.setHorizontalAlignment(SwingConstants.CENTER);
         add(reservedGroupSessionSlide);
         add(reservedIndividualSessionSlide);
         add(midLabel);
+        add(midLabel2);
         add(backbButton);
     }
 
@@ -57,10 +64,6 @@ public class ViewReservationsPanel extends SuperPanel {
         revalidate();
     }
     
-    public void resetReservedGroupSessionSlide(){
-        reservedGroupSessionSlide.setSelectedIndex(0);
-    }
-    
     public void setReservedIndividualSessionSlide(List<String> options, ActionListener al) {
         remove(1);
         options.add(0, "Reserved Individual Workouts");
@@ -69,12 +72,20 @@ public class ViewReservationsPanel extends SuperPanel {
         reservedIndividualSessionSlide = null;
         reservedIndividualSessionSlide = new JComboBox<>(sessions);
         reservedIndividualSessionSlide.addActionListener(al);
-        add(reservedIndividualSessionSlide, 0);
+        add(reservedIndividualSessionSlide, 1);
         revalidate();
     }
     
-    public void resetReservedIndividualSessionSlide(){
+    public void resetReservedGroupSessionSlide(ActionListener al){
+        reservedGroupSessionSlide.removeActionListener(al);
+        reservedGroupSessionSlide.setSelectedIndex(0);
+        reservedGroupSessionSlide.addActionListener(al);
+    }
+    
+    public void resetReservedIndividualSessionSlide(ActionListener al){
+        reservedIndividualSessionSlide.removeActionListener(al);
         reservedIndividualSessionSlide.setSelectedIndex(0);
+        reservedIndividualSessionSlide.addActionListener(al);
     }
     
     public JButton getRemoveGroupButton() {
@@ -94,19 +105,35 @@ public class ViewReservationsPanel extends SuperPanel {
     }
 
     public void showRemoveGroupButton(){
-        remove(2);
-        add(removeGroupButton,2);
+        remove(3);
+        add(removeGroupButton,3);
         
     }
     
     public void showRemoveIndividualButton(){
-        remove(2);
-        add(removeIndividualButton,2);
+        remove(3);
+        add(removeIndividualButton,3);
     }
     
     public void hideRemoveButtons(){
-        remove(2);
-        add(midLabel,2);
+        remove(3);
+        add(midLabel2,3);
+    }
+
+    public JButton getRemoveIndividualButton() {
+        return removeIndividualButton;
+    }
+    
+    public void displayGroupChoice(){
+        midLabel.setText(reservedGroupSessionSlide.getSelectedItem().toString());
+    }
+    
+    public void displayIndividualChoice(){
+        midLabel.setText(reservedIndividualSessionSlide.getSelectedItem().toString());
+    }
+    
+    public void hideChoice(){
+        midLabel.setText("");
     }
     
 }

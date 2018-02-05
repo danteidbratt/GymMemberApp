@@ -5,11 +5,13 @@ import java.time.LocalDateTime;
 
 public class TimeSpan {
     
-    LocalDateTime start;
-    LocalDateTime finish;
+    private final LocalDateTime start;
+    private final LocalDateTime finish;
+    private final int minutes;
 
     public TimeSpan(LocalDateTime start, int minutes) {
         this.start = start;
+        this.minutes = minutes;
         this.finish = start.plusMinutes(minutes);
     }
 
@@ -21,4 +23,8 @@ public class TimeSpan {
         return finish;
     }
 
+    public int getMinutes() {
+        return minutes;
+    }
+    
 }
