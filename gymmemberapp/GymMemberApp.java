@@ -415,6 +415,7 @@ public class GymMemberApp {
         frame.groupPanel.hideChoice();
         frame.groupPanel.hideConfirmButton();
     }
+    
     private void backFromIndividual(){
         capsule.setState(GROUP_OR_INDIVIDUAL);
         frame.individualPanel.hideChoice();

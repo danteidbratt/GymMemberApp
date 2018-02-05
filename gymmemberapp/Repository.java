@@ -190,29 +190,54 @@ public class Repository {
     }
     
     public int makeGroupSessionReservation(String memberID, String groupSessionID){
-        String query = "insert into booking (memberID, groupSessionID) values (?,?)";
+        String query1 = "select count(*) as 'bookings', "
+                      + "groupSession.capacity as 'capacity' from booking "
+                      + "inner join groupSession on booking.groupSessionID = groupSession.ID "
+                      + "where groupSessionID = ?";
+        String query2 = "insert into booking (memberID, groupSessionID) values (?,?)";
+        int bookings = -1;
+        int capacity = -1;
+        int rowsAffected = -1;
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
-            PreparedStatement stmt = con.prepareStatement(query)){
-            stmt.setString(1, memberID);
-            stmt.setString(2, groupSessionID);
-            return stmt.executeUpdate();
+            PreparedStatement stmt1 = con.prepareStatement(query1);
+            PreparedStatement stmt2 = con.prepareStatement(query2)){
+            con.setAutoCommit(false);
+            stmt1.setString(1, groupSessionID);
+            ResultSet rs = stmt1.executeQuery();
+            while(rs.next()){
+                bookings = rs.getInt("bookings");
+                capacity = rs.getInt("capacity");
+            }
+            if(capacity > bookings) {
+                stmt2.setString(1, memberID);
+                stmt2.setString(2, groupSessionID);
+                rowsAffected = stmt2.executeUpdate();
+            }
+            else {
+                con.rollback();
+                return 0;
+            }
+            con.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1;
+        return rowsAffected;
     }
     
     public int makeIndividualSessionReservation(String memberID, String individualSessionID) {
-        String query = "update individualSession set memberID = ? where ID = ?";
+        String query = "update individualSession set memberID = ? where ID = ? and attendance = 0";
+        int rowsAffected = -1;
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
             PreparedStatement stmt = con.prepareStatement(query)){
             stmt.setString(1, memberID);
             stmt.setString(2, individualSessionID);
-            return stmt.executeUpdate();
+            con.setAutoCommit(false);
+            rowsAffected = stmt.executeUpdate();
+            con.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1;
+        return rowsAffected;
     }
     
     public int removeGroupSession(String memberID, String groupSessionID){
@@ -229,15 +254,16 @@ public class Repository {
     }
     
     public int removeIndividualSession(String individualSessionID){
-        String query = "update individualSession set memberID = null where ID = ?";
+        String query1 = "update individualSession set memberID = null where ID = ?";
+        int rowsAffected = -1;
         try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
-            PreparedStatement stmt = con.prepareStatement(query)){
+            PreparedStatement stmt = con.prepareStatement(query1)){
             stmt.setString(1, individualSessionID);
-            return stmt.executeUpdate();
+            rowsAffected = stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1;
+        return rowsAffected;
     }
     
     public String allOrOne(String query, String nameID){
