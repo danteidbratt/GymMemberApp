@@ -1,5 +1,6 @@
 package gymmemberapp;
 
+import Models.IndividualSession;
 import Models.TimeSpan;
 import static gymmemberapp.Capsule.State.*;
 import java.awt.event.ActionEvent;
@@ -67,7 +68,7 @@ public class GymMemberApp {
                 bookGroup();
             }
             else if (e.getSource() == frame.groupOrIndividualPanel.getIndividualButton()) {
-                capsule.setState(INDIVIDUAL);
+                bookIndividual();
             }
             else if (e.getSource() == frame.groupOrIndividualPanel.getBackButton()) {
                 capsule.setState(BOOK_OR_UNBOOK);
@@ -113,6 +114,7 @@ public class GymMemberApp {
             try {
                 capsule.setMember(repository.getMembers(input).get(0));
                 capsule.getMember().setGroupSessions(repository.getGroupSessionsInMember(String.valueOf(capsule.getMember().getID())));
+                capsule.getMember().setIndividualSessions(repository.getIndividualSessionsInMember(String.valueOf(capsule.getMember().getID())));
                 capsule.setState(BOOK_OR_UNBOOK);
                 frame.loginPanel.getTextField().setText("");
                 frame.loginPanel.getInfoText().setText("");
@@ -144,6 +146,20 @@ public class GymMemberApp {
                         .collect(Collectors.toList()), ah);
         frame.groupPanel.resetDateSlide();
         frame.groupPanel.resetSessionSlide();
+    }
+    
+    private void bookIndividual(){
+        capsule.setState(INDIVIDUAL);
+        capsule.setIndividualSessions(repository.getIndividualSessions("").stream()
+                .filter(a -> a.getTimeSpan().getStart().isAfter(LocalDateTime.now())
+                          && a.getTimeSpan().getStart().isBefore(LocalDateTime.now().plusDays(14))
+                          && a.getMember() == null)
+                .collect(Collectors.toList()));
+        frame.individualPanel.setDateSlide(capsule.getIndividualSessions().stream()
+                .map(a -> a.getTimeSpan().getStart().toLocalDate().toString())
+                .collect(Collectors.toSet())
+                .stream()
+                .collect(Collectors.toList()), ah);
     }
     
     private void filterGroupByType(){

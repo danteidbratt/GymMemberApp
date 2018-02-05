@@ -86,13 +86,11 @@ public class Repository {
                 GroupSession temp = new GroupSession();
                 temp.setCapacity(rs.getInt("capacity"));
                 temp.setTimeSpan(LocalDateTime.parse(rs.getString("scheduled").substring(0, 19), formatter), rs.getInt("minutes"));
-//                temp.getDuration().setMinutes(rs.getInt("minutes"));
                 temp.getExerciseType().setName(rs.getString("type"));
                 temp.setGroupSessionID(rs.getInt("groupSessionID"));
                 temp.setSessionID(rs.getInt("sessionID"));
                 temp.getHall().setName(rs.getString("hall"));
                 temp.getTrainer().setName(rs.getString("trainer"));
-//                temp.setTimeScheduled(LocalDateTime.parse(rs.getString("scheduled").substring(0, 19), formatter));
                 temp.setParticipants(getMembersInGroup(String.valueOf(rs.getInt("groupSessionID"))));
                 groupSessions.add(temp);
             }
@@ -100,6 +98,47 @@ public class Repository {
             e.printStackTrace();
         }
         return groupSessions;
+    }
+    
+    public List<IndividualSession> getIndividualSessions(String individualSessionID){
+        List<IndividualSession> individualSessions = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String query = "select individualSession.ID as 'individualSessionID', " +
+                       "hall.name as 'hall', " +
+                       "session.scheduled as 'scheduled', " +
+                       "duration.minutes as 'minutes', " +
+                       "trainer.name as 'trainer', " +
+                       "member.ID as 'memberID', " +
+                       "session.ID as 'sessionID' " +
+                       "from individualSession " +
+                       "inner join session on individualSession.sessionID = session.ID " +
+                       "inner join hall on session.hallID = hall.ID " +
+                       "inner join duration on session.durationID = duration.ID " +
+                       "left join member on individualSession.memberID = member.ID " +
+                       "inner join trainer on session.trainerID = trainer.ID";
+        if (individualSessionID.length() > 0)
+            query = query + " where individualSession.ID = ?";
+        
+        try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
+            PreparedStatement stmt = con.prepareStatement(query)){
+            if (individualSessionID.length() > 0)
+                stmt.setString(1, individualSessionID);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()){
+                IndividualSession temp = new IndividualSession();
+                temp.setTimeSpan(LocalDateTime.parse(rs.getString("scheduled").substring(0, 19), formatter), rs.getInt("minutes"));
+                temp.setIndividualSessionID(rs.getInt("individualSessionID"));
+                temp.setSessionID(rs.getInt("sessionID"));
+                temp.getHall().setName(rs.getString("hall"));
+                temp.getTrainer().setName(rs.getString("trainer"));
+                if (rs.getInt("memberID") > 0)
+                    temp.setMember(getMembers(String.valueOf(rs.getInt("memberID"))).get(0));
+                individualSessions.add(temp);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return individualSessions;
     }
     
     private List<Member> getMembersInGroup(String groupSessionID){
@@ -132,6 +171,22 @@ public class Repository {
             e.printStackTrace();
         }
         return groupSessionsInMember;
+    }
+    
+    public List<IndividualSession> getIndividualSessionsInMember(String memberID){
+        List<IndividualSession> individualSessionsInMember = new ArrayList<>();
+        String query = "select ID as 'ID' from individualSession where memberID = ?";
+        try(Connection con = DriverManager.getConnection(logInfo.code, logInfo.name, logInfo.pass);
+            PreparedStatement stmt = con.prepareStatement(query)){
+            stmt.setString(1, memberID);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()){
+                individualSessionsInMember.add(getIndividualSessions(String.valueOf(rs.getInt("ID"))).get(0));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return individualSessionsInMember;
     }
     
     public int makeGroupSessionReservation(String memberID, String groupSessionID){

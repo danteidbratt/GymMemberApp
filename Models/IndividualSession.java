@@ -3,7 +3,6 @@ package Models;
 public class IndividualSession extends Session{
     
     private int individualSessionID;
-    private boolean attendance;
     private Member member;
 
     public int getIndividualSessionID() {
@@ -12,14 +11,6 @@ public class IndividualSession extends Session{
 
     public void setIndividualSessionID(int individualSessionID) {
         this.individualSessionID = individualSessionID;
-    }
-
-    public boolean isAttendance() {
-        return attendance;
-    }
-
-    public void setAttendance(boolean attendance) {
-        this.attendance = attendance;
     }
 
     public Member getMember() {
