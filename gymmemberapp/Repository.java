@@ -31,7 +31,6 @@ public class Repository {
                 Member temp = new Member();
                 temp.setName(rs.getString("name"));
                 temp.setID(rs.getInt("ID"));
-//                temp.setGroupSessions(getGroupSessionsInMember(String.valueOf(temp.getID())));
                 members.add(temp);
             }
         } catch (SQLException e) {
@@ -52,6 +51,7 @@ public class Repository {
                 temp.setName(rs.getString("name"));
                 exerciseTypes.add(temp);
             }
+            
         } catch (SQLException e) {
             e.printStackTrace();
         }
